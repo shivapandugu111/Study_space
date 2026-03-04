@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Material</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+        background: #f5f7fb;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+        background: white;
+        padding: 15px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .header h2 {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .back-btn {
+        background: #4e73df;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .back-btn:hover {
+        background: #2e59d9;
+    }
+
+    /* Layout */
+    .main {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 300px;
+        background: white;
+        padding: 20px;
+        overflow-y: auto;
+        border-right: 1px solid #e3e6f0;
+    }
+
+    .topic {
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s;
+        font-weight: 500;
+        color: #444;
+    }
+
+    .topic:hover {
+        background: #e8f0fe;
+        color: #2e59d9;
+    }
+
+    .topic.active {
+        background: #4e73df;
+        color: white;
+    }
+
+    /* PDF Section */
+    .content {
+        flex: 1;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pdf-container {
+        flex: 1;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: #888;
+        margin-top: 100px;
+    }
+
+    /* Responsive */
+    @media(max-width: 768px){
+        .sidebar {
+            width: 200px;
+        }
+    }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+    <button class="back-btn" onclick="goBack()">← Back</button>
+    <h2 id="subjectTitle">Subject</h2>
+</div>
+
+<div class="main">
+
+    <div class="sidebar" id="topicsContainer"></div>
+
+    <div class="content">
+        <div class="pdf-container" id="pdfContainer">
+            <div class="empty-state">
+                📘 Select a topic to view study material
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+const subjects = {
+    "indian-history": {
+        title: "Indian History",
+        topics: [
+              { name: "Ancient History", file: "tribesintelangan.pdf" },      // ✅ SAME FOLDER
+            { name: "Medieval History", file: "tribesintelangan.pdf" },     // ✅ SAME FOLDER  
+            { name: "Modern History", file: "tribesintelangan.pdf" }
+        ]
+    }
+};
+
+const urlParams = new URLSearchParams(window.location.search);
+const subjectKey = urlParams.get("subject");
+const subject = subjects[subjectKey];
+
+if(subject){
+    document.getElementById("subjectTitle").innerText = subject.title;
+    const container = document.getElementById("topicsContainer");
+
+    subject.topics.forEach(topic => {
+        const div = document.createElement("div");
+        div.className = "topic";
+        div.innerText = topic.name;
+        div.onclick = () => openPDF(topic.file, div);
+        container.appendChild(div);
+    });
+}
+
+<!-- function openPDF(file, element){ -->
+    <!-- document.querySelectorAll(".topic").forEach(t => t.classList.remove("active")); -->
+    <!-- element.classList.add("active"); -->
+
+    <!-- // ✅ IMPROVED: Better PDF handling + error check -->
+    <!-- const iframe = `<iframe src="${file}#view=FitH" onload="this.style.opacity='1'"  -->
+                       <!-- onerror="this.parentNode.innerHTML='<div style=\\'padding:40px;text-align:center;color:#f44336\\'>❌ PDF not found! <br>Put <b>${file}</b> in same folder as HTML</div>'"></iframe>`; -->
+    
+    <!-- document.getElementById("pdfContainer").innerHTML = iframe; -->
+<!-- } -->
+
+
+
+<!-- function openPDF(file, element){ -->
+    <!-- document.querySelectorAll(".topic").forEach(t => t.classList.remove("active")); -->
+    <!-- element.classList.add("active"); -->
+
+    <!-- // 🔒 MAX SECURITY PDF PARAMETERS (Hides toolbar + save/print buttons) -->
+    <!-- const securePdfUrl = `${file}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`; -->
+
+    <!-- const iframe = `<iframe src="${securePdfUrl}"  -->
+                       <!-- onload="this.style.opacity='1';  -->
+                               <!-- blockPdfControls()"  -->
+                       <!-- onerror="this.parentNode.innerHTML='<div style=\\'padding:40px;text-align:center;color:#f44336;font-size:18px;font-weight:bold\\'>❌ PDF not found! <br>Put <b>${file}</b> in same folder as HTML</div>'" -->
+                       <!-- style="-webkit-user-select:none;-moz-user-select:none;user-select:none;" -->
+                       <!-- oncontextmenu="return false" -->
+                       <!-- onkeydown="if(event.ctrlKey&&(event.keyCode==83||event.keyCode==80))return false" -->
+                       <!-- ondragstart="return false"></iframe>`; -->
+    
+    <!-- document.getElementById("pdfContainer").innerHTML = iframe; -->
+<!-- } -->
+
+<!-- // 🛡️ ADD THIS PROTECTION FUNCTION (put anywhere in your <script>) -->
+<!-- function blockPdfControls() { -->
+    <!-- // Block Ctrl+S (Save), Ctrl+P (Print) -->
+    <!-- document.onkeydown = function(e) { -->
+        <!-- if ((e.ctrlKey || e.metaKey) && (e.keyCode == 83 || e.keyCode == 80)) { -->
+            <!-- e.preventDefault(); -->
+            <!-- showBlockMsg(); -->
+            <!-- return false; -->
+        <!-- } -->
+    <!-- }; -->
+    
+    <!-- // Block right-click -->
+    <!-- document.oncontextmenu = function() {  -->
+        <!-- showBlockMsg(); -->
+        <!-- return false;  -->
+    <!-- }; -->
+    
+    <!-- // Block drag -->
+    <!-- document.ondragstart = function() { return false; }; -->
+<!-- } -->
+
+<!-- function showBlockMsg() { -->
+    <!-- const msg = document.createElement('div'); -->
+    <!-- msg.innerHTML = '🚫 Save/Print Blocked'; -->
+    <!-- msg.style.cssText = 'position:fixed;top:20px;right:20px;background:#f44336;color:white;padding:15px;border-radius:8px;z-index:9999;font-weight:bold'; -->
+    <!-- document.body.appendChild(msg); -->
+    <!-- setTimeout(() => msg.remove(), 2000); -->
+<!-- } -->
+
+
+
+
+<!-- function openPDF(file, element){ -->
+    <!-- document.querySelectorAll(".topic").forEach(t => t.classList.remove("active")); -->
+    <!-- element.classList.add("active"); -->
+
+    <!-- // 🛡️ ULTIMATE PDF PROTECTION URL (HIDES EVERYTHING) -->
+    <!-- const secureUrl = `${file}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`; -->
+
+    <!-- const iframe = `<div style="position:relative;height:100%;background:white"> -->
+        <!-- <iframe src="${secureUrl}"  -->
+                <!-- style="width:100%;height:100%;border:none;pointer-events:none" -->
+                <!-- onload="this.style.opacity='1';parent.blockPdfRightClick(event)"  -->
+                <!-- onerror="parent.showPdfError('${file}')"> -->
+        <!-- </iframe> -->
+        <!-- <!-- 🛡️ OVERLAY BLOCKS ALL CLICKS --> -->
+        <!-- <div style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:auto" -->
+             <!-- oncontextmenu="return false"  -->
+             <!-- onmousedown="if(event.button==2) return showBlockMsg(); return false" -->
+             <!-- ondragstart="return false"></div> -->
+    <!-- </div>`; -->
+    
+    <!-- document.getElementById("pdfContainer").innerHTML = iframe; -->
+<!-- } -->
+
+<!-- // 🛡️ ADD THESE GLOBAL FUNCTIONS (put in <script>) -->
+<!-- function blockPdfRightClick(e) { -->
+    <!-- document.addEventListener('contextmenu', blockRightClick, true); -->
+    <!-- document.addEventListener('keydown', blockKeys, true); -->
+<!-- } -->
+
+<!-- function blockRightClick(e) { -->
+    <!-- if (e.target.closest('.pdf-container')) { -->
+        <!-- e.preventDefault(); -->
+        <!-- e.stopPropagation(); -->
+        <!-- showBlockMsg('Right-click'); -->
+        <!-- return false; -->
+    <!-- } -->
+<!-- } -->
+
+<!-- function blockKeys(e) { -->
+    <!-- // Ctrl+S, Ctrl+P, F12 -->
+    <!-- if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'p')) { -->
+        <!-- e.preventDefault(); -->
+        <!-- showBlockMsg('Save/Print'); -->
+        <!-- return false; -->
+    <!-- } -->
+<!-- } -->
+
+<!-- function showBlockMsg(action) { -->
+    <!-- const msg = document.createElement('div'); -->
+    <!-- msg.innerHTML = `🚫 ${action || 'Action'} BLOCKED<br><small>Study Mode Only</small>`; -->
+    <!-- msg.style.cssText = ` -->
+        <!-- position:fixed;top:50%;left:50%;transform:translate(-50%,-50%); -->
+        <!-- background:rgba(244,67,54,0.98);color:white;padding:25px 40px; -->
+        <!-- border-radius:15px;font-size:20px;font-weight:bold;text-align:center; -->
+        <!-- z-index:10000;box-shadow:0 15px 40px rgba(0,0,0,0.5);min-width:250px; -->
+    <!-- `; -->
+    <!-- document.body.appendChild(msg); -->
+    <!-- setTimeout(() => msg.remove(), 2000); -->
+<!-- } -->
+
+<!-- function showPdfError(file) { -->
+    <!-- document.getElementById("pdfContainer").innerHTML =  -->
+        <!-- `<div style="padding:40px;text-align:center;color:#f44336;font-size:18px;font-weight:bold;"> -->
+            <!-- ❌ PDF not found!<br>Put <b>${file}</b> in same folder as HTML -->
+        <!-- </div>`; -->
+<!-- } -->
+
+
+
+function openPDF(file, element){
+    document.querySelectorAll(".topic").forEach(t => t.classList.remove("active"));
+    element.classList.add("active");
+
+    // 🔒 HIDE TOOLBAR + ENABLE SCROLL/PAGE COUNT
+    const pdfUrl = `${file}#toolbar=0&navpanes=0&view=FitH`;
+
+    document.getElementById("pdfContainer").innerHTML = 
+        `<iframe src="${pdfUrl}" 
+                 style="width:100%; height:100%; border:none;" 
+                 scrolling="yes" 
+                 frameborder="0"
+                 onload="initProtection()"></iframe>`;
+}
+
+// 🛡️ SIMPLE PROTECTION - ADD THESE 2 FUNCTIONS
+function initProtection() {
+    // BLOCK Ctrl+S, Ctrl+P everywhere
+    document.onkeydown = function(e) {
+        var key = e.keyCode ? e.keyCode : e.which;
+        if ((e.ctrlKey || e.metaKey) && (key == 83 || key == 80)) { // S=83, P=80
+            e.preventDefault();
+            alert('🚫 Save/Print Disabled for Study Mode!');
+            return false;
+        }
+    };
+    
+    // BLOCK right-click on PDF only
+    document.getElementById('pdfContainer').oncontextmenu = function() {
+        alert('🚫 Right-click Save-As Disabled!');
+        return false;
+    };
+}
+
+
+
+
+
+
+function goBack(){
+    window.location.href = "study.html";
+}
+
+</script>
+
+</body>
+</html>
